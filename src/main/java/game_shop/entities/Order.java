@@ -2,6 +2,7 @@ package game_shop.entities;
 
 import game_shop.repositories.Identifiable;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 public class Order implements Identifiable<Long> {
@@ -11,7 +12,7 @@ public class Order implements Identifiable<Long> {
 
     private User buyer;
 
-    private Set<Game> games;
+    private BigDecimal sum;
 
     public Order() {
         this.id = orderId++;
@@ -38,11 +39,19 @@ public class Order implements Identifiable<Long> {
         this.buyer = buyer;
     }
 
-    public Set<Game> getGames() {
-        return games;
+    public static long getOrderId() {
+        return orderId;
     }
 
-    public void setGames(Set<Game> games) {
-        this.games = games;
+    public static void setOrderId(long orderId) {
+        Order.orderId = orderId;
+    }
+
+    public BigDecimal getSum() {
+        return sum;
+    }
+
+    public void setSum(BigDecimal sum) {
+        this.sum = sum;
     }
 }

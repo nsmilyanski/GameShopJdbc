@@ -7,10 +7,12 @@ import game_shop.exceptions.EntityPersistenceException;
 import game_shop.exceptions.NonExistingEntityException;
 import game_shop.repositories.GameRepository;
 import game_shop.repositories.OrderRepository;
+import game_shop.repositories.ShoppingCardRepository;
 import game_shop.repositories.UserRepository;
 import game_shop.services.OrderService;
 import game_shop.services.UserService;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 
 public class UserServiceImpl implements UserService {
@@ -18,13 +20,16 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
     private final OrderService orderService;
+    private final ShoppingCardRepository shoppingCardRepository;
     private static User logInUser;
 
 
-    public UserServiceImpl(GameRepository gameRepository, UserRepository userRepository, OrderService orderService) {
+    public UserServiceImpl(GameRepository gameRepository, UserRepository userRepository,
+                           OrderService orderService, ShoppingCardRepository shoppingCardRepository) {
         this.userRepository = userRepository;
         this.gameRepository = gameRepository;
         this.orderService = orderService;
+        this.shoppingCardRepository = shoppingCardRepository;
     }
 
     @Override
@@ -59,7 +64,16 @@ public class UserServiceImpl implements UserService {
             System.out.println(e.getMessage());
         }
 
+
         if (inUser != null){
+            ShoppingCard card = shoppingCardRepository.findById(logInUser.getId());
+            if (card == null) {
+                System.out.println("You do not have a shopping card!");
+                System.out.println("You have to add shopping card!");
+            }else {
+                inUser.setShoppingCard(card);
+                System.out.println("You already add shopping card, and you can have shopping!");
+            }
             logInUser = inUser;
             System.out.println(inUser.getFullName() + " successfully logIn");
         }else {
@@ -143,10 +157,10 @@ public class UserServiceImpl implements UserService {
         logInUser.getShoppingCard().getItems()
                 .forEach( game -> System.out.printf(" - Game: %s  Price: %s%n", game.getTitle(), game.getPrice()));
 
-        orderService.addOrder(logInUser, logInUser.getShoppingCard().getItems());
-        logInUser.setGames(logInUser.getShoppingCard().getItems());
+        BigDecimal sum = BigDecimal.valueOf(logInUser.getShoppingCard().getItems().stream().map(Game::getPrice).mapToDouble(BigDecimal::doubleValue)
+                .sum());
 
-        userRepository.update(logInUser);
+        orderService.addOrder(logInUser, sum);
 
         logInUser.getShoppingCard().setItems(new HashSet<>());
         System.out.println("Thank you! You successfully bought games");
@@ -161,6 +175,8 @@ public class UserServiceImpl implements UserService {
             return;
         }
         ShoppingCard shoppingCard = new ShoppingCard(number);
+        shoppingCard.setUser(logInUser);
+        shoppingCardRepository.create(shoppingCard);
         logInUser.setShoppingCard(shoppingCard);
         try {
             userRepository.update(logInUser);

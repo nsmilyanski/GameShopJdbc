@@ -40,7 +40,8 @@ public class User implements Identifiable<Long> {
         this.fullName = fullName;
     }
 
-    public User(String email, String password, String fullName, Boolean isAdmin) {
+    public User(long id , String email, String password, String fullName, Boolean isAdmin) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.fullName = fullName;

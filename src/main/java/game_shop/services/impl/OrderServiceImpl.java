@@ -6,6 +6,7 @@ import game_shop.entities.User;
 import game_shop.repositories.OrderRepository;
 import game_shop.services.OrderService;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 public class OrderServiceImpl implements OrderService {
@@ -17,10 +18,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void addOrder(User buyer, Set<Game> items) {
+    public void addOrder(User buyer, BigDecimal sum) {
         Order order = new Order();
         order.setBuyer(buyer);
-        order.setGames(items);
+        order.setSum(sum);
         orderRepository.create(order);
         System.out.println("You game is on the way");
     }

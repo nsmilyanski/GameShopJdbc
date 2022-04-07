@@ -4,11 +4,19 @@ import game_shop.entities.Order;
 import game_shop.exceptions.EntityPersistenceException;
 import game_shop.exceptions.NonExistingEntityException;
 import game_shop.repositories.OrderRepository;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 
+@Slf4j
 public class OrderRepositoryJdbc implements OrderRepository {
+    private static final String INSERT_NEW_ORDER =
+            "insert into `order` (`user_id`, `sum`) " +
+                    "values (?, ?);";
     private Connection connection;
 
     public OrderRepositoryJdbc(Connection connection) {
@@ -27,7 +35,39 @@ public class OrderRepositoryJdbc implements OrderRepository {
 
     @Override
     public Order create(Order entity) {
-        return null;
+        try(var stmt = connection.prepareStatement(INSERT_NEW_ORDER, Statement.RETURN_GENERATED_KEYS)) {
+            // 4. Set params and execute SQL query
+            stmt.setInt(1, entity.getBuyer().getId().intValue());
+            stmt.setBigDecimal(2, entity.getSum());
+            // 5. Execute insert statement
+            connection.setAutoCommit(false);
+            var affectedRows = stmt.executeUpdate();
+            // more updates here ...
+            connection.commit();
+            connection.setAutoCommit(true);
+
+            // 6. Check results and Get generated primary ke
+            if (affectedRows == 0) {
+                throw new EntityPersistenceException("Creating order failed, no rows affected.");
+            }
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    entity.setId(generatedKeys.getLong(1));
+                    return entity;
+                }
+                else {
+                    throw new EntityPersistenceException("Creating order failed, no ID obtained.");
+                }
+            }
+        } catch (SQLException ex) {
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                throw new EntityPersistenceException("Error rolling back SQL query: " + INSERT_NEW_ORDER, ex);
+            }
+            log.error("Error creating connection to DB", ex);
+            throw new EntityPersistenceException("Error executing SQL query: " + INSERT_NEW_ORDER, ex);
+        }
     }
 
     @Override

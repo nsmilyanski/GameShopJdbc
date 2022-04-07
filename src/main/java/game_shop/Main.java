@@ -5,9 +5,11 @@ import game_shop.exceptions.NonExistingEntityException;
 import game_shop.jdbc.JdbcSimpleDemo;
 import game_shop.repositories.GameRepository;
 import game_shop.repositories.OrderRepository;
+import game_shop.repositories.ShoppingCardRepository;
 import game_shop.repositories.UserRepository;
 import game_shop.repositories.impl.GameRepositoryJdbc;
 import game_shop.repositories.impl.OrderRepositoryJdbc;
+import game_shop.repositories.impl.ShoppingCardRepositoryJdbc;
 import game_shop.repositories.impl.UserRepositoryJdbc;
 import game_shop.services.GameService;
 import game_shop.services.OrderService;
@@ -42,10 +44,11 @@ public class Main {
         GameRepository gameRepository = new GameRepositoryJdbc(connection);
         UserRepository userRepository = new UserRepositoryJdbc(connection);
         OrderRepository orderRepository = new OrderRepositoryJdbc(connection);
+        ShoppingCardRepository shoppingCardRepository = new ShoppingCardRepositoryJdbc(connection);
 
 
         OrderService orderService = new OrderServiceImpl(orderRepository);
-        UserService userService = new UserServiceImpl(gameRepository, userRepository, orderService);
+        UserService userService = new UserServiceImpl(gameRepository, userRepository, orderService, shoppingCardRepository);
         GameService gameService = new GameServiceImpl(gameRepository, userService);
 
 

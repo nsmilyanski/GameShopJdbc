@@ -1,6 +1,5 @@
 package game_shop.repositories.impl;
 
-import game_shop.entities.Game;
 import game_shop.entities.User;
 import game_shop.exceptions.EntityPersistenceException;
 import game_shop.exceptions.NonExistingEntityException;
@@ -19,10 +18,10 @@ import java.util.List;
 public class UserRepositoryJdbc implements UserRepository {
     private static final String SELECT_ALL_USERS = "select * from `user`;";
     private static final String FIND_BY_ID = "select * from `user` where id = ?;";
-    private static final String CHECK_USERS = "select u.full_name, u.`password`, u.`email`, u.`is_admin` from `user` as u " +
+    private static final String CHECK_USERS = "select u.id, u.full_name, u.`password`, u.`email`, u.`is_admin` from `user` as u " +
             " where u.full_name = ? and u.`password` = ?;";
-    public static final String UPDATE_GAME = "update user set `email` = ?,  `password` = ?, full_name = ?, is_admin = ? " +
-            "where id = ?; ";
+    public static final String UPDATE_USER = "update user set `email` = ?,  `password` = ?, full_name = ?, is_admin = ? " +
+            " where id = ?;";
     private static final String CHECK_EMAIL = "select count(*) as cou from user where email = ? ;";
     private static final String SELECT_COUNT_USERS = "select count(*) as count from `user`;";
     private static final String INSERT_NEW_USER =
@@ -123,7 +122,7 @@ public class UserRepositoryJdbc implements UserRepository {
     @Override
     public User update(User entity) throws NonExistingEntityException {
         User user = null;
-        try(var stmt = connection.prepareStatement(UPDATE_GAME)) {
+        try(var stmt = connection.prepareStatement(UPDATE_USER)) {
 
             stmt.setString(1, entity.getEmail());
             stmt.setString(2, entity.getPassword());
@@ -135,7 +134,7 @@ public class UserRepositoryJdbc implements UserRepository {
         } catch (SQLException ex) {
             log.error("Error creating connection to DB", ex);
             System.out.println(ex.getMessage());
-            throw new EntityPersistenceException("Error executing SQL query: " + UPDATE_GAME, ex);
+            throw new EntityPersistenceException("Error executing SQL query: " + UPDATE_USER, ex);
         }
         return user;
 
@@ -170,7 +169,7 @@ public class UserRepositoryJdbc implements UserRepository {
             var rs = stmt.executeQuery();
             // 5. Transform ResultSet to Book
             rs.next();
-            return new User(rs.getString("email"), rs.getString("password"),
+            return new User(rs.getLong(1), rs.getString("email"), rs.getString("password"),
                   rs.getString("full_name"), rs.getBoolean("is_admin"));
 
         } catch (SQLException ex) {

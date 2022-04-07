@@ -4,10 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ShoppingCard {
-    private static long shoppingCardId = 0;
     private long id;
 
     private String number;
+
+    private User user;
 
 
     private Set<Game> items;
@@ -18,7 +19,6 @@ public class ShoppingCard {
     public ShoppingCard(String number) {
         this.number = number;
         this.items = new HashSet<>();
-        this.id = shoppingCardId++;
     }
 
     public long getId() {
@@ -47,6 +47,14 @@ public class ShoppingCard {
 
     public void setItems(Set<Game> items) {
         this.items = items;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public void removeItemFromShoppingCard(Game game){
