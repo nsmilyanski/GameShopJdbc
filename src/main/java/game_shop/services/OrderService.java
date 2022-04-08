@@ -8,4 +8,7 @@ import java.util.Set;
 
 public interface OrderService {
     void addOrder(User buyer, BigDecimal sum);
+
+    void findAll();
+
 }

@@ -8,9 +8,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class Game implements Identifiable<Long>, Serializable {
-    private static final long serialVersionUID = 1L;
-    private static long gameId = 0;
-
     private long id;
 
     private String title;
@@ -32,11 +29,11 @@ public class Game implements Identifiable<Long>, Serializable {
     private Category category;
 
     public Game() {
-        this.id = gameId++;
+
     }
 
     public Game(String title, BigDecimal price, BigDecimal size, String trailer, String thumbnailUrl, String description, int releaseDate) {
-        this.id = gameId++;
+        this.id = id;
         this.title = title;
         this.price = price;
         this.size = size;

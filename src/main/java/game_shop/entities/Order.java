@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 public class Order implements Identifiable<Long> {
-    private static long orderId = 0;
     private long id;
 
 
@@ -15,7 +14,11 @@ public class Order implements Identifiable<Long> {
     private BigDecimal sum;
 
     public Order() {
-        this.id = orderId++;
+    }
+
+    public Order(long id, BigDecimal sum) {
+        this.id = id;
+        this.sum = sum;
     }
 
     public Long getId() {
@@ -39,13 +42,6 @@ public class Order implements Identifiable<Long> {
         this.buyer = buyer;
     }
 
-    public static long getOrderId() {
-        return orderId;
-    }
-
-    public static void setOrderId(long orderId) {
-        Order.orderId = orderId;
-    }
 
     public BigDecimal getSum() {
         return sum;
@@ -53,5 +49,13 @@ public class Order implements Identifiable<Long> {
 
     public void setSum(BigDecimal sum) {
         this.sum = sum;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", sum=" + sum +
+                '}';
     }
 }

@@ -7,6 +7,7 @@ import game_shop.repositories.OrderRepository;
 import game_shop.services.OrderService;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Set;
 
 public class OrderServiceImpl implements OrderService {
@@ -24,5 +25,12 @@ public class OrderServiceImpl implements OrderService {
         order.setSum(sum);
         orderRepository.create(order);
         System.out.println("You game is on the way");
+    }
+
+    @Override
+    public void findAll() {
+        Collection<Order> allOrders = orderRepository.findAll();
+
+        allOrders.forEach(System.out::println);
     }
 }

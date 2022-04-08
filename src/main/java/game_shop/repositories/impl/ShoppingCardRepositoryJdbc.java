@@ -21,7 +21,7 @@ public class ShoppingCardRepositoryJdbc implements ShoppingCardRepository {
             "insert into `shopping_card` (`number`, `user_id`) " +
                     "values (?, ?);";
 
-    public static final String FIND_BY_ID = "select * from `shopping_card` where id = ?;";
+    public static final String FIND_BY_USER_ID = "select * from `shopping_card` where user_id = ?;";
     public static final String DELETE_CARD = "delete from shopping_card " +
             "where id = ?; ";
     private static final String SELECT_COUNT_CARD = "select count(*) as count from `shopping_card`;";
@@ -39,7 +39,7 @@ public class ShoppingCardRepositoryJdbc implements ShoppingCardRepository {
 
     @Override
     public ShoppingCard findById(Long id) {
-        try(var stmt = connection.prepareStatement(FIND_BY_ID)) {
+        try(var stmt = connection.prepareStatement(FIND_BY_USER_ID)) {
             // 4. Set params and execute SQL query
             stmt.setInt(1, id.intValue());
             var rs = stmt.executeQuery();
@@ -48,7 +48,7 @@ public class ShoppingCardRepositoryJdbc implements ShoppingCardRepository {
             return new ShoppingCard(rs.getString("number"));
         } catch (SQLException ex) {
             log.error("Error creating connection to DB", ex);
-            throw new EntityPersistenceException("Error executing SQL query: " + FIND_BY_ID, ex);
+            throw new EntityPersistenceException("Error executing SQL query: " + FIND_BY_USER_ID, ex);
         }
     }
 

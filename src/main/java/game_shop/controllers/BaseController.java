@@ -12,13 +12,13 @@ public class BaseController {
     private GameService gameService;
     private UserService userService;
 
+
     public BaseController(GameService gameService, UserService userService) {
         this.gameService = gameService;
         this.userService = userService;
     }
 
     public void init() {
-      gameService.loadData();
         var menu = new Menu("Game Menu", List.of(
                 new Menu.Option("Register User:", () -> {
                     var user = new NewUserDialog().input();
@@ -58,8 +58,6 @@ public class BaseController {
                 }),
                 new Menu.Option("ShowAllGames", () -> {
                     System.out.println("Choose your favorite game:");
-                    Scanner scanner = new Scanner(System.in);
-                    gameService.loadData();
                     gameService.findAllGames();
                     return "";
                 }),
@@ -88,6 +86,23 @@ public class BaseController {
                     } catch (NonExistingEntityException e) {
                         System.out.println(e.getMessage());
                     }
+                    return "";
+                }),
+                new Menu.Option("Comment game", () -> {
+                    var comment = new NewCommentDialog().input();
+                    userService.makeComment(comment.getDescription(), comment.getGame().getTitle());
+                    return "";
+                }),
+                new Menu.Option("ShowAllComments", () -> {
+                    userService.findAllComments();
+                    return "That is all comments";
+                }),
+                new Menu.Option("Edit comments from you", () -> {
+                    userService.updateComment();
+                    return "";
+                }),
+                new Menu.Option("ShowAllOrders(just for admin)", () -> {
+                    userService.findAllOrders();
                     return "";
                 })
 

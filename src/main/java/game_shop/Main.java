@@ -3,14 +3,8 @@ package game_shop;
 import game_shop.controllers.BaseController;
 import game_shop.exceptions.NonExistingEntityException;
 import game_shop.jdbc.JdbcSimpleDemo;
-import game_shop.repositories.GameRepository;
-import game_shop.repositories.OrderRepository;
-import game_shop.repositories.ShoppingCardRepository;
-import game_shop.repositories.UserRepository;
-import game_shop.repositories.impl.GameRepositoryJdbc;
-import game_shop.repositories.impl.OrderRepositoryJdbc;
-import game_shop.repositories.impl.ShoppingCardRepositoryJdbc;
-import game_shop.repositories.impl.UserRepositoryJdbc;
+import game_shop.repositories.*;
+import game_shop.repositories.impl.*;
 import game_shop.services.GameService;
 import game_shop.services.OrderService;
 import game_shop.services.UserService;
@@ -45,10 +39,11 @@ public class Main {
         UserRepository userRepository = new UserRepositoryJdbc(connection);
         OrderRepository orderRepository = new OrderRepositoryJdbc(connection);
         ShoppingCardRepository shoppingCardRepository = new ShoppingCardRepositoryJdbc(connection);
+        CommentRepository commentRepository = new CommentRepositoryJdbc(connection);
 
 
         OrderService orderService = new OrderServiceImpl(orderRepository);
-        UserService userService = new UserServiceImpl(gameRepository, userRepository, orderService, shoppingCardRepository);
+        UserService userService = new UserServiceImpl(gameRepository, userRepository, orderService, shoppingCardRepository, commentRepository);
         GameService gameService = new GameServiceImpl(gameRepository, userService);
 
 

@@ -1,19 +1,20 @@
 package game_shop.services.impl;
 
+import game_shop.entities.Comment;
 import game_shop.entities.Game;
 import game_shop.entities.ShoppingCard;
 import game_shop.entities.User;
 import game_shop.exceptions.EntityPersistenceException;
 import game_shop.exceptions.NonExistingEntityException;
-import game_shop.repositories.GameRepository;
-import game_shop.repositories.OrderRepository;
-import game_shop.repositories.ShoppingCardRepository;
-import game_shop.repositories.UserRepository;
+import game_shop.repositories.*;
 import game_shop.services.OrderService;
 import game_shop.services.UserService;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Scanner;
 
 public class UserServiceImpl implements UserService {
 
@@ -21,15 +22,17 @@ public class UserServiceImpl implements UserService {
     private final GameRepository gameRepository;
     private final OrderService orderService;
     private final ShoppingCardRepository shoppingCardRepository;
+    private final CommentRepository commentRepository;
     private static User logInUser;
 
 
     public UserServiceImpl(GameRepository gameRepository, UserRepository userRepository,
-                           OrderService orderService, ShoppingCardRepository shoppingCardRepository) {
+                           OrderService orderService, ShoppingCardRepository shoppingCardRepository, CommentRepository commentRepository) {
         this.userRepository = userRepository;
         this.gameRepository = gameRepository;
         this.orderService = orderService;
         this.shoppingCardRepository = shoppingCardRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -66,7 +69,13 @@ public class UserServiceImpl implements UserService {
 
 
         if (inUser != null){
-            ShoppingCard card = shoppingCardRepository.findById(logInUser.getId());
+            ShoppingCard card = null;
+            try {
+             card = shoppingCardRepository.findById(inUser.getId());
+
+            }catch (EntityPersistenceException exception) {
+                System.out.println(exception.getMessage());
+            }
             if (card == null) {
                 System.out.println("You do not have a shopping card!");
                 System.out.println("You have to add shopping card!");
@@ -184,6 +193,110 @@ public class UserServiceImpl implements UserService {
             System.out.println(e.getMessage());
         }
         System.out.println("Successfully add shopping card!");
+    }
+
+    @Override
+    public void makeComment(String description, String gameTitle) {
+        if (logInUser == null){
+            System.out.println("No logged in user, first you should log in!");
+            return;
+        }
+        Game byGameTitle = null;
+        try {
+        byGameTitle = gameRepository.findByGameTitle(gameTitle);
+
+        }catch (EntityPersistenceException exception) {
+            System.out.println("NO game with this title!");
+            return;
+        }
+
+        Comment comment = new Comment();
+        comment.setDescription(description);
+        comment.setUser(logInUser);
+        comment.setGame(byGameTitle);
+
+        commentRepository.create(comment);
+
+        System.out.printf("%s successfully add comment%n", logInUser.getFullName());
+
+
+
+    }
+
+    @Override
+    public void findAllComments() {
+        Collection<Comment> all = commentRepository.findAll();
+        all.stream().forEach(System.out::println);
+    }
+
+    @Override
+    public void updateComment() {
+        if (logInUser == null){
+            System.out.println("No logged in user, first you should log in!");
+            return;
+        }
+
+        List<Comment> allComments = null;
+
+        try {
+
+           allComments =
+                    commentRepository.findAllCommentsFromCurrentUser(logInUser.getId());
+        }catch (EntityPersistenceException e) {
+            System.out.println("No comments from you!");
+            return;
+        }
+
+        if (allComments.size() == 1) {
+            System.out.println("you have gust one comment");
+            System.out.println("Edit comment:");
+            Comment comment = allComments.get(0);
+            Scanner scanner = new Scanner(System.in);
+            String description = scanner.nextLine();
+            comment.setDescription(description);
+            try {
+                commentRepository.update(comment);
+            } catch (NonExistingEntityException e) {
+                System.out.println(e.getMessage());
+            }
+            System.out.println("You successfully edit comment");
+        }else {
+            System.out.printf("You have %d comment, which one you wont edit", allComments.size());
+            int index = 1;
+            for (Comment comment : allComments) {
+                index++;
+                System.out.printf("%d - %s%n", index, comment);
+            }
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Enter the comment you have shoosen:");
+            int value = Integer.parseInt(scanner.nextLine());
+            Comment comment = allComments.get(value);
+            System.out.println("Enter the new comment:");
+            String description = scanner.nextLine();
+
+            comment.setDescription(description);
+
+
+            try {
+                commentRepository.update(comment);
+            } catch (NonExistingEntityException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+
+    }
+
+    @Override
+    public void findAllOrders() {
+        if (logInUser == null){
+            System.out.println("First you have to log in!");
+            return;
+        }else if (!logInUser.getAdmin()){
+            System.out.println("Just admin can add games to Database");
+            return;
+        }
+        orderService.findAll();
     }
 
     private boolean passwordIsNotCorrect(String password) {

@@ -196,7 +196,7 @@ public class GameRepositoryJdbc implements GameRepository {
             var rs = stmt.executeQuery();
             // 5. Transform ResultSet to Book
             rs.next();
-            return new Game(rs.getString("title"), rs.getBigDecimal("price"),
+            return new Game(rs.getLong("id"), rs.getString("title"), rs.getBigDecimal("price"),
                     rs.getBigDecimal("size"), rs.getString("trailer"), rs.getString("thumbnail_url"),
                     rs.getString("description"), rs.getInt("year"));
         } catch (SQLException ex) {

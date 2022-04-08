@@ -1,5 +1,6 @@
 package game_shop.repositories.impl;
 
+import game_shop.entities.Comment;
 import game_shop.entities.Order;
 import game_shop.exceptions.EntityPersistenceException;
 import game_shop.exceptions.NonExistingEntityException;
@@ -10,13 +11,16 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 public class OrderRepositoryJdbc implements OrderRepository {
     private static final String INSERT_NEW_ORDER =
             "insert into `order` (`user_id`, `sum`) " +
                     "values (?, ?);";
+    private static final String SELECT_ALL_ORDERS = "select *  from `order`;";
     private Connection connection;
 
     public OrderRepositoryJdbc(Connection connection) {
@@ -25,7 +29,15 @@ public class OrderRepositoryJdbc implements OrderRepository {
 
     @Override
     public Collection<Order> findAll() throws EntityPersistenceException {
-        return null;
+        try(var stmt = connection.prepareStatement(SELECT_ALL_ORDERS)) {
+            // 4. Set params and execute SQL query
+            var rs = stmt.executeQuery();
+            // 5. Transform ResultSet to Book
+            return toComments(rs);
+        } catch (SQLException ex) {
+            log.error("Error creating connection to DB", ex);
+            throw new EntityPersistenceException("Error executing SQL query: " + SELECT_ALL_ORDERS, ex);
+        }
     }
 
     @Override
@@ -88,5 +100,16 @@ public class OrderRepositoryJdbc implements OrderRepository {
     @Override
     public long count() {
         return 0;
+    }
+    public List<Order> toComments(ResultSet rs) throws SQLException {
+        List<Order> results = new ArrayList<>();
+        while (rs.next()) {
+            results.add(new Order(
+                    rs.getLong(1),
+                    rs.getBigDecimal("sum")
+
+            ));
+        }
+        return results;
     }
 }

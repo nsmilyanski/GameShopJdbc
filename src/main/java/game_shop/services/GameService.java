@@ -6,7 +6,6 @@ import game_shop.exceptions.NonExistingEntityException;
 import java.math.BigDecimal;
 
 public interface GameService {
-    void loadData();
 
     void addGame(Game game);
 

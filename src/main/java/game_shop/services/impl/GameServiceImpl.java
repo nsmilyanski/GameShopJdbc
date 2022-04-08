@@ -22,12 +22,6 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void loadData() {
-    }
-
-
-
-    @Override
     public void addGame(Game game) {
         if (userService.getLogInUser() == null){
             System.out.println("First you have to log in!");
@@ -49,6 +43,7 @@ public class GameServiceImpl implements GameService {
             System.out.println("Just admin can add games to Database");
             return;
         }
+        long id = gameID;
 
         gameRepository.editGame(gameID, price, size);
 
